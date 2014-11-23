@@ -33,10 +33,24 @@ class MOTION_DESIGN(tweenStyle):
 
 		super(MOTION_DESIGN, self).__init__(**kwargs)
 
+		self.listMd = None
 		self.filenameMd = filenameMd
+		self.loadMotionDesign()
 
 	def loadMotionDesign(self):
-		pass
+		if None != self.filenameMd :
+			fileMd = open(self.filenameMd)
+			# IMP : Add checks
+			contents = fileMd.readlines()
+			fileMd.close()
+
+			if 0 < len(contents):
+				self.listMd = []
+				for item in contents:
+					value = float(item)
+					self.listMd.append(value)
+
+			#print self.listMd
 
 	def evaluate(self, t, b, c, d):
 		#print "self.filenameMd", self.filenameMd
@@ -47,7 +61,23 @@ class LINEAR(MOTION_DESIGN):
 		super(LINEAR, self).__init__(**kwargs)
 
 	def evaluate(self, t, b, c, d):
-		return c * t / d + b
+
+		eval_value = 0
+
+		eval_linear_value = t / d
+
+		if None != self.listMd :
+			lenSample = len(self.listMd)
+			indexSample = eval_linear_value * (lenSample - 1)
+			new_indexSample = round(indexSample)
+			eval_value = self.listMd[int(new_indexSample)]
+
+		else:
+			eval_value = c * t / d + b
+
+		return eval_value
+
+
 
 def OUT_EXPO(t, b, c, d):
 	if t == d:
@@ -353,7 +383,7 @@ if "__main__" == __name__ :
 	print "Started ..."
 	print
 
-	oTweenType = LINEAR(filenameMd=1)
+	oTweenType = LINEAR(filenameMd="../app/md/ex1.md")
 
 	oTweenContext = tweenContext()
 
@@ -364,7 +394,7 @@ if "__main__" == __name__ :
 		context=oTweenContext,
 		rot=10,
 		tween_type=oTweenType,
-		#duration=10,
+		duration=2.0,
 		#delay=5,
 		#customUpdate=oSprite.customUpdate,
 		cbOnStart=oSprite.onStart_sample,
