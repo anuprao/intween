@@ -1,0 +1,8 @@
+Forked from https://github.com/PiPeep/PiTweener
+which was based on caurina Tweener: http://code.google.com/p/tweener/
+which was forked from pyTweener: http://wiki.python-ogre.org/index.php/CodeSnippits_pyTweener
+
+Copyright (c)
+    Ben Harling (2009)
+    Benjamin Woodruff (2010)
+    Anup Jayapal Rao (2014)
