@@ -11,13 +11,48 @@
 import time
 import math
 
+class tweenStyle(object):
+	def __init__(self):
+		pass
+
+	def evaluate(self):
+		return 0
+
+class DUMMY(tweenStyle):
+	def __init__(self, **kwargs):
+		super(DUMMY, self).__init__(**kwargs)
+
+	def evaluate(self, t, b, c, d):
+		return 0
+
+class MOTION_DESIGN(tweenStyle):
+	def __init__(self, **kwargs):
+		filenameMd = None
+		if "filenameMd"  in kwargs:
+			filenameMd = kwargs.pop("filenameMd")
+
+		super(MOTION_DESIGN, self).__init__(**kwargs)
+
+		self.filenameMd = filenameMd
+
+	def loadMotionDesign(self):
+		pass
+
+	def evaluate(self, t, b, c, d):
+		#print "self.filenameMd", self.filenameMd
+		return 0 # c * t / d + b
+
+class LINEAR(MOTION_DESIGN):
+	def __init__(self, **kwargs):
+		super(LINEAR, self).__init__(**kwargs)
+
+	def evaluate(self, t, b, c, d):
+		return c * t / d + b
+
 def OUT_EXPO(t, b, c, d):
 	if t == d:
 		return b + c
 	return c * (-2 ** (-10 * t / d) + 1) + b;
-
-def LINEAR(t, b, c, d):
-	return c * t / d + b
 
 def IN_QUAD(t, b, c, d):
 	t /= d
@@ -90,8 +125,7 @@ def OUT_ELASTIC(t, b, c, d):
 
 	return (a * 2. ** (-10. * t) * math.sin((t * d - s) * (2. * math.pi)/ p) + c + b)
 
-def DUMMY(t, b, c, d):
-	return 0
+
 
 class tween(object):
 	def __init__(self, sprite, tweentype, duration, delay, cbOnStart, cbOnComplete, cbAfterUpdate, **kwargs):
@@ -155,7 +189,7 @@ class tween(object):
 
 			if not self.bComplete:
 				for prop, start_value, change  in self.t_props:
-					newValue = self.tweentype(self.delta, start_value, change, self.duration)
+					newValue = self.tweentype.evaluate(self.delta, start_value, change, self.duration)
 					setattr(self.sprite, prop, newValue)
 
 			if self.delta == self.duration:
@@ -311,21 +345,25 @@ class testSprite(tweenSprite):
 		self.rot = (self.rot + 1) % 360
 
 	def afterUpdate_sample(self):
-		print "rot:", self.rot
+		#print "rot:",
+		print self.rot
 
 if "__main__" == __name__ :
 
 	print "Started ..."
 	print
 
+	oTweenType = LINEAR(filenameMd=1)
+
 	oTweenContext = tweenContext()
 
 	oSprite = testSprite()
 	oSprite.name = "oSprite"
+
 	tween_sample = oSprite.add_tween(
 		context=oTweenContext,
 		rot=10,
-		tween_type=LINEAR,
+		tween_type=oTweenType,
 		#duration=10,
 		#delay=5,
 		#customUpdate=oSprite.customUpdate,
@@ -337,7 +375,7 @@ if "__main__" == __name__ :
 	#for i in range(0,100):
 	while oTweenContext.has_tweens():
 		oTweenContext.update()
-		print
+		#print
 		time.sleep(.1)
 
 	print "Done"
