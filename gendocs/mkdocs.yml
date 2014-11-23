@@ -1,0 +1,10 @@
+site_name: intween
+
+theme_dir: 'themes/custom_rtd'
+theme: null
+
+pages:
+- ['index.md', 'Home']
+- ['features.md', 'Features']
+- ['design.md', 'Design']
+- ['about.md', 'About']
