@@ -196,6 +196,10 @@ class tweenContext(object):
 			for attr,tween in spriteTweenCollection.iteritems():
 				tween.remove()
 
+	def has_tweens(self):
+		nReturn = len(self.dictTweens)
+		return nReturn
+
 	def has_tweens_for(self, oSprite):
 		nReturn = 0
 		if self.dictTweens.has_key(oSprite):
@@ -205,6 +209,8 @@ class tweenContext(object):
 		return nReturn
 
 	def add_tween(self, oSprite, tweentype, duration, delay, cbOnStart, cbOnComplete, cbAfterUpdate, **kwargs):
+		newTween = None
+
 		if not self.dictTweens.has_key(oSprite):
 			self.dictTweens[oSprite] = {}
 
@@ -212,31 +218,37 @@ class tweenContext(object):
 
 		for key,value in kwargs.iteritems():
 			if not spriteTweenCollection.has_key(key):
-				spriteTweenCollection[key] = tween(oSprite, tweentype, duration, delay, cbOnStart, cbOnComplete, cbAfterUpdate, **kwargs)
+				newTween = tween(oSprite, tweentype, duration, delay, cbOnStart, cbOnComplete, cbAfterUpdate, **kwargs)
+				spriteTweenCollection[key] = newTween
 
-	def update(self, sprite, time_since_last_update=None):
+		return newTween
+
+	def update(self, time_since_last_update=None):
 
 		current_time = time.time()
 
 		if time_since_last_update is None:
 			time_since_last_update = current_time - self.prev_time
 
-		# IMP : OPTIMIZE
-		if self.dictTweens.has_key(sprite):
-			spriteTweenCollection = self.dictTweens[sprite]
+		# Outer Pass 1
+		for key,value in self.dictTweens.iteritems():
+			spriteTweenCollection = value
 
-			#pass 1
+			# Inner Pass 1
 			for attr,tween in spriteTweenCollection.iteritems():
 				tween.update(time_since_last_update)
 
-			#pass 2
+			# Inner Pass 2
 			for attr in spriteTweenCollection.keys():
 				tween = spriteTweenCollection[attr]
 				if tween.bComplete:
 					del spriteTweenCollection[attr]
 
+		# Outer Pass 2
+		for key in self.dictTweens.keys():
+			spriteTweenCollection = self.dictTweens[key]
 			if 0 == len(spriteTweenCollection):
-				del self.dictTweens[sprite]
+				del self.dictTweens[key]
 
 		self.prev_time = current_time
 
@@ -245,10 +257,13 @@ class tweenSprite(object):
 		self.name = "Name_unassigned"
 		self.oTweenContext = None
 
-	def has_tweens(self):
-		if None != self.oTweenContext :
-			return self.oTweenContext.has_tweens_for(self)
-		return 0
+		self.listTweens = []
+
+	#def has_tweens(self):
+	#	# IMP : OPTIMIZE
+	#	#if None != self.oTweenContext :
+	#	#	return self.oTweenContext.has_tweens_for(self)
+	#	return len(self.listTweens)
 
 	def add_tween(self, **kwargs):
 		if "context" in kwargs:
@@ -278,12 +293,13 @@ class tweenSprite(object):
 		if "cbAfterUpdate"  in kwargs:
 			cbAfterUpdate = kwargs.pop("cbAfterUpdate")
 
-		self.oTweenContext.add_tween(self, tweentype, duration, delay, cbOnStart, cbOnComplete, cbAfterUpdate, **kwargs)
+		newTween = self.oTweenContext.add_tween(self, tweentype, duration, delay, cbOnStart, cbOnComplete, cbAfterUpdate, **kwargs)
+		self.listTweens.append(newTween)
 
-	def update(self):
-		# IMP : OPTIMIZE
-		if None != self.oTweenContext :
-			return self.oTweenContext.update(self)
+	#def update(self):
+	#	# IMP : OPTIMIZE
+	#	if None != self.oTweenContext :
+	#		return self.oTweenContext.update(self)
 
 class testSprite(tweenSprite):
 	def __init__(self, **kwargs):
@@ -324,8 +340,8 @@ if "__main__" == __name__ :
 		)
 
 	#for i in range(0,100):
-	while oSprite.has_tweens():
-		oSprite.update()
+	while oTweenContext.has_tweens():
+		oTweenContext.update()
 		print
 		time.sleep(.1)
 
