@@ -230,23 +230,18 @@ class tweenContext(object):
 		if time_since_last_update is None:
 			time_since_last_update = current_time - self.prev_time
 
-		# Outer Pass 1
-		for key,value in self.dictTweens.iteritems():
-			spriteTweenCollection = value
+		# Outer loop
+		for key in self.dictTweens.keys():
+			spriteTweenCollection = self.dictTweens[key]
 
-			# Inner Pass 1
-			for attr,tween in spriteTweenCollection.iteritems():
-				tween.update(time_since_last_update)
-
-			# Inner Pass 2
+			# Inner loop
 			for attr in spriteTweenCollection.keys():
 				tween = spriteTweenCollection[attr]
+
+				tween.update(time_since_last_update)
 				if tween.bComplete:
 					del spriteTweenCollection[attr]
 
-		# Outer Pass 2
-		for key in self.dictTweens.keys():
-			spriteTweenCollection = self.dictTweens[key]
 			if 0 == len(spriteTweenCollection):
 				del self.dictTweens[key]
 
