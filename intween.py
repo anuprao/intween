@@ -14,8 +14,6 @@
 import time
 import math
 
-import intweenexport
-
 class tweenStyle(object):
 	def __init__(self):
 		pass
@@ -477,7 +475,9 @@ class testSprite(tweenSprite):
 ###################################################################################################
 
 if "__main__" == __name__ :
-
+	
+	import intweenexport
+	
 	print("Started ...")
 
 	oTweenType = LINEAR()
